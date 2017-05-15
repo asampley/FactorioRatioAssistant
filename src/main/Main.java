@@ -3,6 +3,7 @@ package main;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -57,13 +58,42 @@ public class Main {
 				Item item = Item.fromName(line.trim());
 //				Recipe recipe = recipes.get(item);
 				Tree<RecipeCount> tree = ratioSolver.solveInteger(item);
+				System.out.println("--Tree--");
 				System.out.println(tree);
-//				printRecursive(recipes, 0, item, new Fraction(multipleToWhole(recipes, item) / recipe.time()));
+				Map<Recipe, Fraction> totals = treeTotal(tree);
+				Fraction everythingTotal = new Fraction(0);
+				System.out.println("--Totals--");
+				for (Recipe recipe : totals.keySet()) {
+					System.out.println(new RecipeCount(recipe, totals.get(recipe)));
+					everythingTotal = everythingTotal.add(totals.get(recipe));
+				}
+				System.out.println("----");
+				System.out.println(everythingTotal + " Total");
 			} catch (ItemNotRegisteredException e) {
 				System.err.println(e.getMessage());
 			}
 		}
 		in.close();
+	}
+	
+	public static Map<Recipe, Fraction> treeTotal(Tree<RecipeCount> tree) {
+		Map<Recipe, Fraction> totalMachines = new HashMap<>();
+		
+		totalMachines.put(tree.getRootValue().getRecipe(), tree.getRootValue().getCount());
+		
+		for (Tree<RecipeCount> child : tree.getChildren()) {
+			Map<Recipe, Fraction> childStats = treeTotal(child);
+			
+			for (Recipe recipe : childStats.keySet()) {
+				if (totalMachines.containsKey(recipe)) {
+					totalMachines.put(recipe, totalMachines.get(recipe).add(childStats.get(recipe)));
+				} else {
+					totalMachines.put(recipe, childStats.get(recipe));
+				}
+			}
+		}
+		
+		return totalMachines;
 	}
 	
 //	public static int multipleToWhole(Map<Item, Recipe> recipes, Item item) {

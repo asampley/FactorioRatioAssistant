@@ -3,10 +3,6 @@ package tree;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.fraction.Fraction;
-
-import recipe.Ingredient;
-
 public class Tree<T> {
 	protected T item;
 	protected List<Tree<T>> children;
