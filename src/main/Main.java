@@ -46,7 +46,7 @@ public class Main {
 			System.exit(1);
 		}
 
-		System.out.println(recipes);
+		//System.out.println(recipes);
 		
 		RatioSolver ratioSolver = new RatioSolver(recipes);
 		
@@ -56,7 +56,6 @@ public class Main {
 			
 			try {
 				Item item = Item.fromName(line.trim());
-//				Recipe recipe = recipes.get(item);
 				ratioSolver.solve(item);
 				Tree<RecipeCount> tree = ratioSolver.solution();
 				
