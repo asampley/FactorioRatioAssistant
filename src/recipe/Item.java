@@ -9,17 +9,19 @@ public class Item implements Serializable {
 	private static Map<String, Item> registry = new HashMap<>();
 	
 	public final String NAME;
+	public final boolean countable;
 	
-	protected Item(String name) {
+	protected Item(String name, boolean countable) {
 		NAME = name.toLowerCase();
+		this.countable = countable;
 	}
 	
-	public static void register(String name) throws ItemAlreadyRegisteredException {
+	public static void register(String name, boolean countable) throws ItemAlreadyRegisteredException {
 		name = name.toLowerCase();
 		if (registry.containsKey(name)) {
 			throw new ItemAlreadyRegisteredException(name);
 		} else {
-			registry.put(name, new Item(name));
+			registry.put(name, new Item(name, countable));
 		}
 	}
 	

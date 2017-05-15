@@ -13,13 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.math3.fraction.Fraction;
+
 import recipe.Ingredient;
 import recipe.Item;
+import recipe.ItemIsCountableException;
 import recipe.ItemNotRegisteredException;
 import recipe.Recipe;
 
 public class RecipeInit {
-	public static Map<Item, Recipe> readFromDirectory(File directory) throws FileNotFoundException, IOException, ItemNotRegisteredException {
+	public static Map<Item, Recipe> readFromDirectory(File directory) throws FileNotFoundException, IOException {
 		Map<Item, Recipe> recipes = new HashMap<>();
 		if (!directory.isDirectory()) {
 			throw new IOException(directory.getPath() + " is not a directory");
@@ -35,18 +38,20 @@ public class RecipeInit {
 					recipes.put(recipe.output(), recipe);
 				}
 			} catch (NoSuchElementException e) {
-				System.out.println("Unable to read from " + file);
+				System.err.println("Unable to read from " + file);
+			} catch (ItemNotRegisteredException | ItemIsCountableException e) {
+				System.err.println("Error in file " + file + ": " + e.getMessage());
 			}
 		}
 		
 		return recipes;
 	}
 	
-	public static Recipe readFromFile(File file) throws FileNotFoundException, IOException, ItemNotRegisteredException {
+	public static Recipe readFromFile(File file) throws FileNotFoundException, IOException, ItemNotRegisteredException, ItemIsCountableException {
 		return readFromStream(new BufferedReader(new InputStreamReader(new FileInputStream(file))));
 	}
 	
-	public static Recipe readFromStream(BufferedReader reader) throws IOException, ItemNotRegisteredException {
+	public static Recipe readFromStream(BufferedReader reader) throws IOException, ItemNotRegisteredException, ItemIsCountableException {
 		List<Ingredient> ingredients = new ArrayList<>();
 		
 		Iterator<String> lines = reader.lines().iterator();
@@ -75,7 +80,7 @@ public class RecipeInit {
 			iCount = lineParsed[1].trim();
 			
 			Item input = Item.fromName(iName);
-			int inputCount = Integer.parseInt(iCount);
+			Fraction inputCount = new Fraction(Float.parseFloat(iCount));
 			
 			ingredients.add(new Ingredient(input, inputCount));
 		}

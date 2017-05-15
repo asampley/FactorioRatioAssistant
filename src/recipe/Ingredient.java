@@ -1,11 +1,17 @@
 package recipe;
 
+import org.apache.commons.math3.fraction.Fraction;
+
 public class Ingredient {
 	protected Item item;
-	protected int count;
+	protected Fraction count;
 	
-	public Ingredient(Item item, int count) {
+	public Ingredient(Item item, Fraction count) throws ItemIsCountableException {
 		this.item = item;
+		
+		if (item.countable && count.getDenominator() != 1) {
+			throw new ItemIsCountableException(item);
+		}
 		this.count = count;
 	}
 	
@@ -28,7 +34,7 @@ public class Ingredient {
 		return item;
 	}
 	
-	public int count() {
+	public Fraction count() {
 		return count;
 	}
 }

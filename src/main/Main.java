@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.math3.fraction.Fraction;
 import org.apache.commons.math3.util.Pair;
@@ -16,6 +17,7 @@ import ratio.RatioSolver;
 import ratio.RecipeCount;
 import recipe.Ingredient;
 import recipe.Item;
+import recipe.ItemIsCountableException;
 import recipe.ItemNotRegisteredException;
 import recipe.Recipe;
 import tree.Tree;
@@ -31,7 +33,8 @@ public class Main {
 		Map<Item, Recipe> recipes = null;
 		
 		try {
-			ItemInit.registerFromFile(new File(recipeDirectory, "Items.txt"));
+			ItemInit.registerFromFile(new File(recipeDirectory, "items"), true);
+			ItemInit.registerFromFile(new File(recipeDirectory, "fluids"), false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -39,9 +42,6 @@ public class Main {
 		try {
 			recipes = RecipeInit.readFromDirectory(new File(recipeDirectory, "recipes"));
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (ItemNotRegisteredException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -57,95 +57,35 @@ public class Main {
 			try {
 				Item item = Item.fromName(line.trim());
 //				Recipe recipe = recipes.get(item);
-				Tree<RecipeCount> tree = ratioSolver.solveInteger(item);
+				ratioSolver.solve(item);
+				Tree<RecipeCount> tree = ratioSolver.solution();
+				
+				if (tree == null) {
+					System.err.println("No recipe found for " + item);
+					continue;
+				}
+				
 				System.out.println("--Tree--");
 				System.out.println(tree);
-				Map<Recipe, Fraction> totals = treeTotal(tree);
+				
+				System.out.println("--Cumulative Machines--");
+				Map<Recipe, Fraction> totals = ratioSolver.machines();
 				Fraction everythingTotal = new Fraction(0);
-				System.out.println("--Totals--");
 				for (Recipe recipe : totals.keySet()) {
 					System.out.println(new RecipeCount(recipe, totals.get(recipe)));
 					everythingTotal = everythingTotal.add(totals.get(recipe));
 				}
-				System.out.println("----");
-				System.out.println(everythingTotal + " Total");
+				System.out.println(everythingTotal + " Total Machines");
+				
+				System.out.println("--Raw Consumption Per Second--");
+				Map<Item, Fraction> production = ratioSolver.raw();
+				for (Item itemi : production.keySet()) {
+					System.out.println(production.get(itemi) + " x " + itemi);
+				}
 			} catch (ItemNotRegisteredException e) {
 				System.err.println(e.getMessage());
 			}
 		}
 		in.close();
 	}
-	
-	public static Map<Recipe, Fraction> treeTotal(Tree<RecipeCount> tree) {
-		Map<Recipe, Fraction> totalMachines = new HashMap<>();
-		
-		totalMachines.put(tree.getRootValue().getRecipe(), tree.getRootValue().getCount());
-		
-		for (Tree<RecipeCount> child : tree.getChildren()) {
-			Map<Recipe, Fraction> childStats = treeTotal(child);
-			
-			for (Recipe recipe : childStats.keySet()) {
-				if (totalMachines.containsKey(recipe)) {
-					totalMachines.put(recipe, totalMachines.get(recipe).add(childStats.get(recipe)));
-				} else {
-					totalMachines.put(recipe, childStats.get(recipe));
-				}
-			}
-		}
-		
-		return totalMachines;
-	}
-	
-//	public static int multipleToWhole(Map<Item, Recipe> recipes, Item item) {
-//		int multiple = 1;
-//		ArrayDeque<Recipe> recipesToGo = new ArrayDeque<>();
-//		ArrayDeque<Fraction> recipesPerSec = new ArrayDeque<>();
-//		
-//		Recipe recipe = recipes.get(item);
-//		Fraction recipePerSec = new Fraction(1 / recipe.time());
-//		
-//		if (recipe == null) return multiple;
-//		
-//		recipesToGo.addLast(recipe);
-//		recipesPerSec.addLast(recipePerSec);
-//		
-//		while (!recipesToGo.isEmpty()) {
-//			recipe = recipesToGo.pop();
-//			recipePerSec = recipesPerSec.pop();
-//			
-//			Fraction machines = recipePerSec.multiply(new Fraction(multiple * recipe.time() / recipe.outputCount()));
-//			
-//			//System.out.println(machines + " x " + recipe);
-//			
-//			multiple *= machines.getDenominator();
-//			//System.out.println(multiple);
-//			
-//			for (Ingredient ingredient : recipe.ingredients()) {
-//				Recipe nextRecipe = recipes.get(ingredient.item());
-//				
-//				if (nextRecipe == null) continue;
-//				
-//				recipesToGo.add(nextRecipe);
-//				recipesPerSec.add(recipePerSec.multiply(ingredient.count()));
-//			}
-//		}
-//		
-//		return multiple;
-//	}
-	
-//	public static void printRecursive(Map<Item, Recipe> recipes, int initDepth, Item item, Fraction nPerSec) {
-//		Recipe recipe = recipes.get(item);
-//		
-//		if (recipe == null) return;
-//		
-//		for (int i = 0; i < initDepth; ++i) {
-//			System.out.print("\t");
-//		}
-//		
-//		System.out.println(nPerSec.multiply(new Fraction(recipe.time() / recipe.outputCount())) + " x " + recipe);
-//		
-//		for (Ingredient ingredient : recipe.ingredients()) {
-//			printRecursive(recipes, initDepth + 1, ingredient.item(), nPerSec.multiply(ingredient.count()));
-//		}
-//	}
 }

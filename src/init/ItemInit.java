@@ -12,16 +12,16 @@ import recipe.Item;
 import recipe.ItemAlreadyRegisteredException;
 
 public class ItemInit {
-	public static void registerFromFile(File file) throws FileNotFoundException, IOException {
-		registerFromStream(new BufferedReader(new InputStreamReader(new FileInputStream(file))));
+	public static void registerFromFile(File file, boolean countable) throws FileNotFoundException, IOException {
+		registerFromStream(new BufferedReader(new InputStreamReader(new FileInputStream(file))), countable);
 	}
 	
-	public static void registerFromStream(BufferedReader reader) throws IOException {
+	public static void registerFromStream(BufferedReader reader, boolean countable) throws IOException {
 		Stream<String> lines = reader.lines();
 		
 		lines.forEachOrdered((String s) -> {
 			try {
-				Item.register(s);
+				Item.register(s, countable);
 			} catch (ItemAlreadyRegisteredException e) {
 				System.err.println(e.getMessage());
 			}
