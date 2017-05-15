@@ -79,7 +79,7 @@ public class RatioSolver {
 		}
 		
 		for (Ingredient ingredient : recipe.ingredients()) {
-			Tree<RecipeCount> child = solveRecurse(ingredient.item(), nPerSec.multiply(ingredient.count()));
+			Tree<RecipeCount> child = solveRecurse(ingredient.item(), nPerSec.multiply(ingredient.count()).divide(recipe.outputCount()));
 			if (child != null) {
 				tree.addChild(child);
 			}

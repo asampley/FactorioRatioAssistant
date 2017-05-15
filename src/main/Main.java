@@ -65,7 +65,7 @@ public class Main {
 				}
 				
 				System.out.println("--Tree--");
-				System.out.println(tree);
+				System.out.print(tree);
 				
 				System.out.println("--Cumulative Machines--");
 				Map<Recipe, Fraction> totals = ratioSolver.machines();
