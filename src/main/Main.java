@@ -2,22 +2,16 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 import org.apache.commons.math3.fraction.Fraction;
-import org.apache.commons.math3.util.Pair;
 
 import init.ItemInit;
 import init.RecipeInit;
 import ratio.RatioSolver;
 import ratio.RecipeCount;
-import recipe.Ingredient;
 import recipe.Item;
-import recipe.ItemIsCountableException;
 import recipe.ItemNotRegisteredException;
 import recipe.Recipe;
 import tree.Tree;
