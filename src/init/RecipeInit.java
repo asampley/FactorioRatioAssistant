@@ -19,10 +19,11 @@ import recipe.Ingredient;
 import recipe.Item;
 import recipe.ItemIsCountableException;
 import recipe.ItemNotRegisteredException;
+import recipe.MachineClass;
 import recipe.Recipe;
 
 public class RecipeInit {
-	public static Map<Item, Recipe> readFromDirectory(File directory) throws FileNotFoundException, IOException {
+	public static Map<Item, Recipe> readFromDirectory(File directory, MachineClass machine) throws FileNotFoundException, IOException {
 		Map<Item, Recipe> recipes = new HashMap<>();
 		if (!directory.isDirectory()) {
 			throw new IOException(directory.getPath() + " is not a directory");
@@ -30,7 +31,7 @@ public class RecipeInit {
 		
 		for (File file : directory.listFiles()) {
 			try {
-				Recipe recipe = readFromFile(file);
+				Recipe recipe = readFromFile(file, machine);
 				
 				if (recipe == null) {
 					System.err.println("Warning: Recipe from file " + file + " was not read");
@@ -47,11 +48,11 @@ public class RecipeInit {
 		return recipes;
 	}
 	
-	public static Recipe readFromFile(File file) throws FileNotFoundException, IOException, ItemNotRegisteredException, ItemIsCountableException {
-		return readFromStream(new BufferedReader(new InputStreamReader(new FileInputStream(file))));
+	public static Recipe readFromFile(File file, MachineClass machine) throws FileNotFoundException, IOException, ItemNotRegisteredException, ItemIsCountableException {
+		return readFromStream(new BufferedReader(new InputStreamReader(new FileInputStream(file))), machine);
 	}
 	
-	public static Recipe readFromStream(BufferedReader reader) throws IOException, ItemNotRegisteredException, ItemIsCountableException {
+	public static Recipe readFromStream(BufferedReader reader, MachineClass machine) throws IOException, ItemNotRegisteredException, ItemIsCountableException {
 		List<Ingredient> ingredients = new ArrayList<>();
 		
 		Iterator<String> lines = reader.lines().iterator();
@@ -59,7 +60,7 @@ public class RecipeInit {
 		if (!lines.hasNext()) return null;
 		
 		String line = lines.next();
-		float time = Float.parseFloat(line);
+		Fraction time = new Fraction(Float.parseFloat(line));
 
 		if (!lines.hasNext()) return null;
 		
@@ -85,6 +86,6 @@ public class RecipeInit {
 			ingredients.add(new Ingredient(input, inputCount));
 		}
 		
-		return new Recipe(output, outputCount, time, ingredients);
+		return new Recipe(machine, output, outputCount, time, ingredients);
 	}
 }

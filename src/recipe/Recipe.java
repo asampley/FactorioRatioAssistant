@@ -3,20 +3,23 @@ package recipe;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.math3.fraction.Fraction;
+
 public class Recipe {
+	MachineClass machineClass;
 	Set<Ingredient> ingredients;
 	Item output;
 	int outputCount;
-	float time;
+	Fraction time;
 	
-	public Recipe(Item output, int outputCount, float time, Ingredient... ingredients) {
-		this(output, outputCount, time, Arrays.asList(ingredients));
+	public Recipe(MachineClass machine, Item output, int outputCount, Fraction time, Ingredient... ingredients) {
+		this(machine, output, outputCount, time, Arrays.asList(ingredients));
 	}
 
-	public Recipe(Item output, int outputCount, float time, Collection<Ingredient> ingredients) {
+	public Recipe(MachineClass machine, Item output, int outputCount, Fraction time, Collection<Ingredient> ingredients) {
+		this.machineClass = machine;
 		this.output = output;
 		this.outputCount = outputCount;
 		this.ingredients = new HashSet<>();
@@ -26,7 +29,7 @@ public class Recipe {
 	
 	@Override
 	public String toString() {
-		return "[" + time + "s] (" + output + ":" + outputCount + ") <- " + ingredients;
+		return "(" + output + ":" + outputCount + ") <- " + ingredients;
 	}
 
 	public Item output() {
@@ -41,7 +44,31 @@ public class Recipe {
 		return outputCount;
 	}
 
-	public float time() {
+	public Fraction time() {
 		return time;
+	}
+	
+	public MachineClass machineClass() {
+		return machineClass;
+	}
+	
+	@Override
+	public int hashCode() {
+		return output.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Recipe) {
+			Recipe r = (Recipe)o;
+			
+			return r.ingredients.equals(this.ingredients)
+					&& r.output.equals(this.output)
+					&& r.outputCount == this.outputCount
+					&& r.time.equals(this.time)
+					&& r.machineClass.equals(this.machineClass);
+		}
+		
+		return false;
 	}
 }

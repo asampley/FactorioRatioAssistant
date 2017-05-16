@@ -9,30 +9,36 @@ import org.apache.commons.math3.util.Pair;
 
 import recipe.Ingredient;
 import recipe.Item;
+import recipe.Machine;
+import recipe.MachineClass;
+import recipe.MachineLevelOutOfBoundsException;
 import recipe.Recipe;
 import tree.Tree;
 
 public class RatioSolver {
 	private Map<Item, Recipe> recipes;
 	
-	private Tree<RecipeCount> solution;
+	private Tree<MachineCount> solution;
 	private Map<Item, Fraction> raw;
-	private Map<Recipe, Fraction> machines;
+	private Map<Machine, Fraction> machineCounts;
+	private Map<MachineClass, Integer> machineLevels;
 	
-	public RatioSolver(Map<Item, Recipe> recipes) {
+	public RatioSolver(Map<Item, Recipe> recipes, Map<MachineClass, Integer> machineLevels) {
 		this.recipes = new HashMap<>();
 		this.recipes.putAll(recipes);
 		this.raw = new HashMap<>();
-		this.machines = new HashMap<>();
+		this.machineCounts = new HashMap<>();
+		this.machineLevels = new HashMap<>();
+		this.machineLevels.putAll(machineLevels);
 	}
 	
 	public void solve(Item item) {
 		raw.clear();
-		machines.clear();
+		machineCounts.clear();
 		solution = solveInteger(item);
 	}
 	
-	public Tree<RecipeCount> solution() {
+	public Tree<MachineCount> solution() {
 		return solution;
 	}
 	
@@ -40,21 +46,29 @@ public class RatioSolver {
 		return raw;
 	}
 	
-	public Map<Recipe, Fraction> machines() {
-		return machines;
+	public Map<Machine, Fraction> machines() {
+		return machineCounts;
 	}
 	
-	protected Tree<RecipeCount> solveInteger(Item item) {
-		int multiple = multipleToWhole(item);
-		Recipe recipe = recipes.get(item);
-		
-		//System.out.println(recipes);
-		if (recipe == null) return null;
-		
-		return solveRecurse(item, new Fraction(multiple / recipe.time()));
+	protected Tree<MachineCount> solveInteger(Item item) {
+		try {
+			int multiple = multipleToWhole(item);
+			Recipe recipe = recipes.get(item);
+			
+			//System.out.println(recipes);
+			if (recipe == null) return null;
+			
+			MachineClass mc = recipe.machineClass();
+			Machine m = new Machine(mc, machineLevels.get(mc), recipe);
+			
+			return solveRecurse(item, new Fraction(multiple).divide(m.time()));
+		} catch (MachineLevelOutOfBoundsException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
-	protected Tree<RecipeCount> solveRecurse(Item item, Fraction nPerSec) {
+	protected Tree<MachineCount> solveRecurse(Item item, Fraction nPerSec) throws MachineLevelOutOfBoundsException {
 		Recipe recipe = recipes.get(item);
 		
 		/*
@@ -69,17 +83,19 @@ public class RatioSolver {
 			return null;
 		}
 		
-		Fraction recipeCount = nPerSec.multiply(new Fraction(recipe.time() / recipe.outputCount()));
-		Tree<RecipeCount> tree = new Tree<>(new RecipeCount(recipe, recipeCount));
+		MachineClass mc = recipe.machineClass();
+		Machine machine = new Machine(mc, machineLevels.get(mc), recipe);
+		Fraction machineCount = nPerSec.multiply(machine.time().divide(recipe.outputCount()));
+		Tree<MachineCount> tree = new Tree<>(new MachineCount(machine, machineCount));
 		
-		if (machines.containsKey(recipe)) {
-			machines.put(recipe, machines.get(recipe).add(recipeCount));
+		if (machineCounts.containsKey(machine)) {
+			machineCounts.put(machine, machineCounts.get(machine).add(machineCount));
 		} else {
-			machines.put(recipe, recipeCount);
+			machineCounts.put(machine, machineCount);
 		}
 		
 		for (Ingredient ingredient : recipe.ingredients()) {
-			Tree<RecipeCount> child = solveRecurse(ingredient.item(), nPerSec.multiply(ingredient.count()).divide(recipe.outputCount()));
+			Tree<MachineCount> child = solveRecurse(ingredient.item(), nPerSec.multiply(ingredient.count()).divide(recipe.outputCount()));
 			if (child != null) {
 				tree.addChild(child);
 			}
@@ -88,23 +104,27 @@ public class RatioSolver {
 		return tree;
 	}
 	
-	protected int multipleToWhole(Item item) {
+	protected int multipleToWhole(Item item) throws MachineLevelOutOfBoundsException {
 		int multiple = 1;
-		ArrayDeque<Pair<Recipe, Fraction>> recipesToGo = new ArrayDeque<>();
+		ArrayDeque<Pair<Machine, Fraction>> machinesToGo = new ArrayDeque<>();
 		
 		Recipe recipe = recipes.get(item);
 		if (recipe == null) return multiple;
 		
-		Fraction recipePerSec = new Fraction(1 / recipe.time());
+		MachineClass mc = recipe.machineClass();
+		Machine machine = new Machine(mc, machineLevels.get(mc), recipe);
 		
-		recipesToGo.addLast(new Pair<>(recipe, recipePerSec));
+		Fraction recipePerSec = new Fraction(1).divide(machine.time());
 		
-		while (!recipesToGo.isEmpty()) {
-			Pair<Recipe, Fraction> next = recipesToGo.pop();
-			recipe = next.getFirst();
+		machinesToGo.addLast(new Pair<>(machine, recipePerSec));
+		
+		while (!machinesToGo.isEmpty()) {
+			Pair<Machine, Fraction> next = machinesToGo.pop();
+			machine = next.getFirst();
+			recipe = machine.recipe();
 			recipePerSec = next.getSecond();
 			
-			Fraction machines = recipePerSec.multiply(new Fraction(multiple * recipe.time() / recipe.outputCount()));
+			Fraction machines = recipePerSec.multiply(machine.time()).multiply(multiple).divide(recipe.outputCount());
 			
 			//System.out.println(machines + " x " + recipe);
 			
@@ -116,10 +136,20 @@ public class RatioSolver {
 				
 				if (nextRecipe == null) continue;
 				
-				recipesToGo.add(new Pair<>(nextRecipe, recipePerSec.multiply(ingredient.count())));
+				mc = nextRecipe.machineClass();
+				machine = new Machine(mc, machineLevels.get(mc), nextRecipe);
+				
+				machinesToGo.add(new Pair<>(machine, recipePerSec.multiply(ingredient.count())));
 			}
 		}
 		
 		return multiple;
+	}
+
+	public void setMachineLevel(MachineClass mc, Integer level) throws MachineLevelOutOfBoundsException {
+		if (!mc.hasLevel(level)) {
+			throw new MachineLevelOutOfBoundsException();
+		}
+		machineLevels.put(mc, level);
 	}
 }
