@@ -41,7 +41,7 @@ public class Tree<T> {
 		return toString(0);
 	}
 	
-	protected String toString(int tabs) {
+	public String toString(int tabs) {
 		StringBuffer sb = new StringBuffer();
 		
 		for (int i = 0; i < tabs; ++i) {

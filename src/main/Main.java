@@ -178,13 +178,14 @@ public class Main {
 			}
 			
 			System.out.println("--Tree--");
-			System.out.print(tree);
+			System.out.print(tree.toString(1));
+			System.out.println();
 			
 			System.out.println("--Cumulative Machines by Recipe--");
 			Map<Machine, Fraction> totals = ratioSolver.machines();
 			Map<Pair<MachineClass, Integer>, Fraction> everythingTotal = new HashMap<>();
 			for (Machine machine : totals.keySet()) {
-				System.out.println(new MachineCount(machine, totals.get(machine)));
+				System.out.println("\t" + new MachineCount(machine, totals.get(machine)));
 				MachineClass mc = machine.machineClass();
 				if (everythingTotal.containsKey(machine)) {
 					everythingTotal.put(new Pair<>(mc, machine.level()), everythingTotal.get(mc)).add(totals.get(machine));
@@ -192,21 +193,26 @@ public class Main {
 					everythingTotal.put(new Pair<>(mc, machine.level()), totals.get(machine));
 				}
 			}
+			System.out.println();
 			
 			System.out.println("--Cumulative Machines--");
 			for (Pair<MachineClass, Integer> mci : everythingTotal.keySet()) {
-				System.out.println(mci.getFirst() + " " + mci.getSecond() + " x " + everythingTotal.get(mci));
+				System.out.println("\t" + everythingTotal.get(mci) + " x " + mci.getFirst() + " " + mci.getSecond());
 			}
+			System.out.println();
 			
 			System.out.println("--Raw Consumption Per Second--");
 			Map<Item, Fraction> production = ratioSolver.raw();
 			for (Item itemi : production.keySet()) {
-				System.out.println(production.get(itemi) + " x " + itemi);
+				System.out.println("\t" + production.get(itemi) + " x " + itemi);
 			}
+			System.out.println();
 			
 			System.out.println("--Total Production Per Second--");
 			Fraction prodPerSec = tree.getRootValue().getCount().divide(tree.getRootValue().getMachine().time());
-			System.out.println(prodPerSec + " x " + item);
+			System.out.println("\t" + prodPerSec + " x " + item);
+			System.out.println();
+			
 		} catch (ItemNotRegisteredException e) {
 			System.err.println(e.getMessage());
 		}
