@@ -44,6 +44,8 @@ public class Main {
 		
 		commandMap.put("craft", (s) -> craft(s));
 		commandMap.put("level", (s) -> level(s));
+		commandMap.put("raw", (s) -> raw(s, true));
+		commandMap.put("unraw", (s) -> raw(s, false));
 		
 		String recipeDirectory = args[0];
 		
@@ -116,6 +118,20 @@ public class Main {
 		}
 		in.close();
 	}
+	
+	private static void raw(String args, boolean setRaw) {
+		String itemName = args.trim();
+		
+		try {
+			Item item = Item.fromName(itemName);
+			
+			ratioSolver.setRaw(item, setRaw);
+			System.out.println("Set " + item + " to " + (setRaw ? "raw" : "unraw"));
+		} catch (ItemNotRegisteredException e) {
+			System.err.println(e.getMessage());
+			return;
+		}
+	}
 
 	private static void level(String args) {
 		String[] parsedArgs = args.split(" ");
@@ -187,10 +203,11 @@ public class Main {
 			for (Machine machine : totals.keySet()) {
 				System.out.println("\t" + new MachineCount(machine, totals.get(machine)));
 				MachineClass mc = machine.machineClass();
-				if (everythingTotal.containsKey(machine)) {
-					everythingTotal.put(new Pair<>(mc, machine.level()), everythingTotal.get(mc)).add(totals.get(machine));
+				Pair<MachineClass, Integer> key = new Pair<>(mc, machine.level());
+				if (everythingTotal.containsKey(key)) {
+					everythingTotal.put(key, everythingTotal.get(key).add(totals.get(machine)));
 				} else {
-					everythingTotal.put(new Pair<>(mc, machine.level()), totals.get(machine));
+					everythingTotal.put(key, totals.get(machine));
 				}
 			}
 			System.out.println();
