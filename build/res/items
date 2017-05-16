@@ -10,6 +10,7 @@ Iron Plate
 Copper Plate
 Steel Plate
 Stone Brick
+Concrete
 Sulfur
 Plastic Bar
 Battery
@@ -99,7 +100,7 @@ Active Provider Chest
 Passive Provider Chest
 Storage Chest
 Requester Chest
-Wall
+Stone Wall
 Gate
 Gun Turret
 Laser Turret
