@@ -61,6 +61,6 @@ public class Machine {
 	
 	@Override
 	public String toString() {
-		return this.machineClass().name(this.level()) + " " + this.level() + " [" + this.recipe().time().floatValue() + "s @" + this.speed().floatValue() + "x = " + this.time().floatValue() + "s]" + this.recipe();
+		return this.machineClass().name(this.level()) + " [" + this.recipe().time().floatValue() + "s @" + this.speed().floatValue() + "x = " + this.time().floatValue() + "s]" + this.recipe();
 	}
 }
