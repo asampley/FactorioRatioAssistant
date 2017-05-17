@@ -69,17 +69,28 @@ public class RatioSolver {
 		return machineCounts;
 	}
 	
-	protected Recipe getRecipe(Item item) {
+	/**
+	 * Returns the recipe for a given item. This recipe is null if the
+	 * item will not be expanded in any way. For any recipe, regardless
+	 * of whether it will be expanded or not, use {@link #getRecipeAlways}
+	 * @param item
+	 * @return
+	 */
+	public Recipe getRecipe(Item item) {
 		Recipe recipe;
 		
 		if (doNotSolve.contains(item)) return null;
 		
-		recipe = recipes.get(item);
+		recipe = getRecipeAlways(item);
 		
 		if (recipe == null) return recipe;
 		if (doNotUse.contains(recipe.machineClass())) return null;
 		
 		return recipe;
+	}
+	
+	public Recipe getRecipeAlways(Item item) {
+		return recipes.get(item);
 	}
 	
 	protected Tree<MachineCount> solveInteger(Item item) {

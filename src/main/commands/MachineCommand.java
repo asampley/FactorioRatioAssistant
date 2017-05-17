@@ -19,6 +19,7 @@ public class MachineCommand extends Command {
 		
 		if (machineClassName.length() == 0) {
 			System.err.println("Usage: /machine" + (on ? "on" : "off") + " <machine class>");
+			return;
 		}
 		
 		MachineClass mc = Main.machineClasses.get(machineClassName);

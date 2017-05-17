@@ -19,6 +19,7 @@ import main.commands.HelpCommand;
 import main.commands.Level;
 import main.commands.MachineCommand;
 import main.commands.Raw;
+import main.commands.RecipeCommand;
 import ratio.RatioSolver;
 import recipe.Item;
 import recipe.MachineClass;
@@ -30,6 +31,7 @@ public class Main {
 	
 	public static RatioSolver ratioSolver;
 	public static Map<String, MachineClass> machineClasses;
+	public static Map<Item, Recipe> recipes;
 	
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -48,7 +50,6 @@ public class Main {
 		
 		String recipeDirectory = args[0];
 		
-		Map<Item, Recipe> recipes = null;
 		Map<MachineClass, Integer> machineSpeeds = new HashMap<>();
 		
 		// register all items and fluids
@@ -149,6 +150,7 @@ public class Main {
 		commands.add(new MachineCommand(false));
 		commands.add(new CommandsCommand());
 		commands.add(new HelpCommand());
+		commands.add(new RecipeCommand());
 		
 		for (Command command : commands) {
 			commandMap.put(command.NAME, command);

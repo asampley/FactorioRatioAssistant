@@ -22,6 +22,7 @@ public class HelpCommand extends Command {
 		
 		if (command == null) {
 			System.err.println("No command named \"" + commandName +"\"");
+			return;
 		}
 		
 		System.out.println(command.help());

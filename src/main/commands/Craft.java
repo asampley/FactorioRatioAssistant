@@ -81,6 +81,7 @@ public class Craft extends Command {
 			
 		} catch (ItemNotRegisteredException e) {
 			System.err.println(e.getMessage());
+			return;
 		}
 	}
 }
