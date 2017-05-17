@@ -1,0 +1,3 @@
+/level assembling machine 3
+/level furnace 3
+/machineoff furnace

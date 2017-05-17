@@ -1,6 +1,8 @@
 package main;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +34,7 @@ public class Main {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println("Usage: <config directory>");
+			System.out.println("Usage: <config directory> <init file>");
 			System.exit(1);
 		}
 		
@@ -76,12 +79,28 @@ public class Main {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
+		Scanner in = null;
+		boolean onInitFile = false;
+		if (args.length > 1) {
+			String initFile = args[1];
+			
+			try {
+				in = new Scanner(new FileInputStream(new File(initFile)));
+				onInitFile = true;
+				System.out.println("Loaded init file \"" + initFile + "\"");
+			} catch (FileNotFoundException e) {
+				System.err.println("Warning: Init file \"" + initFile + "\" not found");
+				in = new Scanner(System.in);
+			}
+		} else {
+			in = new Scanner(System.in);
+		}
 
 		//System.out.println(recipes);
 		
 		ratioSolver = new RatioSolver(recipes, machineSpeeds);
 		
-		Scanner in = new Scanner(System.in);
 		while (in.hasNextLine()) {
 			String line = in.nextLine();
 			
@@ -110,7 +129,11 @@ public class Main {
 				commandMap.get(defaultCommand).accept(line);
 			}
 			
-			
+			// check if we are done init file to switch to input
+			if (onInitFile && !in.hasNextLine()) {
+				in.close();
+				in = new Scanner(System.in);
+			}
 		}
 		in.close();
 	}
