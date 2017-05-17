@@ -13,17 +13,17 @@ Once the program is running, all you need to do is type the name of the item tha
 There are a few useful commands to change how the program behaves:
 
 <code>/level \<machine name> \<level> </code><br>
-        Changes the level of a machine. Each machine can have different crafting speeds defined by their machine file.
+        Changes the level of a machine. Each machine can have different crafting speeds defined by their machine file.<br>
         e.g. <code>/level assembling machine 3</code>
         
 <code>/raw \<item name></code><br>
-        Change an item to be considered raw, so that if there is a recipe to craft it, it will not be used. This can be useful if you are transporting the item from another area, where you are making it en masse.
+        Change an item to be considered raw, so that if there is a recipe to craft it, it will not be used. This can be useful if you are transporting the item from another area, where you are making it en masse.<br>
         e.g. <code>/raw electronic circuit</code>
         
 <code>/unraw \<item name></code><br>
-        Change an item to be no longer considered raw, so that if there is a recipe to craft it, it will be used. By default nothing is explicitly considered raw, but this can be useful to undo the <code>/raw</code> command.
+        Change an item to be no longer considered raw, so that if there is a recipe to craft it, it will be used. By default nothing is explicitly considered raw, but this can be useful to undo the <code>/raw</code> command.<br>
         e.g. <code>/unraw electronic circuit</code>
 
 <code>/craft \<item name></code><br>
-        An explicit command, which does the same as just typing an item name directly.
+        An explicit command, which does the same as just typing an item name directly.<br>
         e.g. <code>/craft science pack 1</code>
