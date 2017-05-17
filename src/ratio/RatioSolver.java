@@ -20,6 +20,7 @@ import tree.Tree;
 public class RatioSolver {
 	private Map<Item, Recipe> recipes;
 	private Set<Item> doNotSolve;
+	private Set<MachineClass> doNotUse;
 	
 	private Tree<MachineCount> solution;
 	private Map<Item, Fraction> raw;
@@ -34,6 +35,7 @@ public class RatioSolver {
 		this.machineLevels = new HashMap<>();
 		this.machineLevels.putAll(machineLevels);
 		this.doNotSolve = new HashSet<>();
+		this.doNotUse = new HashSet<>();
 	}
 	
 	/**
@@ -68,11 +70,16 @@ public class RatioSolver {
 	}
 	
 	protected Recipe getRecipe(Item item) {
-		if (doNotSolve.contains(item)) {
-			return null;
-		}
+		Recipe recipe;
 		
-		return recipes.get(item);
+		if (doNotSolve.contains(item)) return null;
+		
+		recipe = recipes.get(item);
+		
+		if (recipe == null) return recipe;
+		if (doNotUse.contains(recipe.machineClass())) return null;
+		
+		return recipe;
 	}
 	
 	protected Tree<MachineCount> solveInteger(Item item) {
@@ -176,5 +183,13 @@ public class RatioSolver {
 			throw new MachineLevelOutOfBoundsException();
 		}
 		machineLevels.put(mc, level);
+	}
+
+	public void useMachineClass(MachineClass mc, boolean on) {
+		if (on) {
+			doNotUse.remove(mc);
+		} else {
+			doNotUse.add(mc);
+		}
 	}
 }

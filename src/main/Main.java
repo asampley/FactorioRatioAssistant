@@ -46,6 +46,9 @@ public class Main {
 		commandMap.put("level", (s) -> level(s));
 		commandMap.put("raw", (s) -> raw(s, true));
 		commandMap.put("unraw", (s) -> raw(s, false));
+		commandMap.put("machineon", (s) -> machine(s, true));
+		commandMap.put("machineoff", (s) -> machine(s, false));
+		commandMap.put("commands", (s) -> commands(s));
 		
 		String recipeDirectory = args[0];
 		
@@ -119,6 +122,30 @@ public class Main {
 		in.close();
 	}
 	
+	private static void commands(String s) {
+		for (String command : commandMap.keySet()) {
+			System.out.println("/" + command);
+		}
+	}
+
+	private static void machine(String args, boolean on) {
+		String machineClassName = args.trim();
+		
+		if (machineClassName.length() == 0) {
+			System.err.println("Usage: /machine" + (on ? "on" : "off") + " <machine class>");
+		}
+		
+		MachineClass mc = machineClasses.get(machineClassName);
+		
+		if (mc == null) {
+			System.err.println("No machine class named \"" + machineClassName + "\" found");
+			return;
+		}
+		
+		ratioSolver.useMachineClass(mc, on);
+		System.out.println("Turned machine class \"" + machineClassName + "\" " + (on ? "on" : "off"));
+	}
+	
 	private static void raw(String args, boolean setRaw) {
 		String itemName = args.trim();
 		
@@ -168,7 +195,7 @@ public class Main {
 			System.err.println("\"" + mc + "\" has no level " + level);
 			return;
 		}
-		System.out.println("Set " + mc + " to level " + level);
+		System.out.println("Set " + mc + " to " + mc.name(level));
 	}
 	
 	private static void printLevelUsage() {

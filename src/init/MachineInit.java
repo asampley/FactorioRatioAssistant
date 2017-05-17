@@ -51,24 +51,28 @@ public class MachineInit {
 	
 	public static MachineClass readFromStream(BufferedReader reader) throws IOException, ItemNotRegisteredException, ItemIsCountableException {
 		List<Fraction> speeds = new ArrayList<>();
+		List<String> names = new ArrayList<>();
 		
 		Iterator<String> lines = reader.lines().iterator();
 
 		if (!lines.hasNext()) return null;
 		
 		String line = lines.next();
-		String name = line.trim();
+		String className = line.trim();
 
 		if (!lines.hasNext()) return null;
 		
 		while (lines.hasNext()) {
 			line = lines.next();
+			String[] lineParsed = line.split(":");
 			
-			Fraction speed = new Fraction(Float.parseFloat(line));
+			String levelName = lineParsed[0].trim();
+			Fraction speed = new Fraction(Float.parseFloat(lineParsed[1].trim()));
 			
+			names.add(levelName);
 			speeds.add(speed);
 		}
 		
-		return new MachineClass(name, speeds);
+		return new MachineClass(className, speeds, names);
 	}
 }
