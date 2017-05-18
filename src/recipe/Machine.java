@@ -9,7 +9,7 @@ public class Machine {
 	
 	public Machine(MachineClass machineClass, int level, Recipe recipe) throws MachineLevelOutOfBoundsException {
 		if (!machineClass.hasLevel(level)) {
-			throw new MachineLevelOutOfBoundsException();
+			throw new MachineLevelOutOfBoundsException(machineClass, level);
 		}
 		
 		this.machineClass = machineClass;

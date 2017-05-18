@@ -180,7 +180,7 @@ public class RatioSolver {
 				if (nextRecipe == null) continue;
 				
 				MachineClass nextMc = nextRecipe.machineClass();
-				Machine nextMachine = new Machine(nextMc, machineLevels.get(mc), nextRecipe);
+				Machine nextMachine = new Machine(nextMc, machineLevels.get(nextMc), nextRecipe);
 				
 				machinesToGo.add(new Pair<>(nextMachine, itemPerSec.multiply(ingredient.count()).divide(recipe.outputCount())));
 			}
@@ -191,7 +191,7 @@ public class RatioSolver {
 
 	public void setMachineLevel(MachineClass mc, Integer level) throws MachineLevelOutOfBoundsException {
 		if (!mc.hasLevel(level)) {
-			throw new MachineLevelOutOfBoundsException();
+			throw new MachineLevelOutOfBoundsException(mc, level);
 		}
 		machineLevels.put(mc, level);
 	}
