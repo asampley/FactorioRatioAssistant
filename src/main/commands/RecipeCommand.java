@@ -1,7 +1,5 @@
 package main.commands;
 
-import java.util.function.Consumer;
-
 import main.Command;
 import main.Main;
 import recipe.Item;
