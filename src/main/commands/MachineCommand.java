@@ -1,7 +1,10 @@
 package main.commands;
 
+import java.util.Collection;
+
 import main.Command;
 import main.Main;
+import recipe.Item;
 import recipe.MachineClass;
 
 public class MachineCommand extends Command {
@@ -29,7 +32,9 @@ public class MachineCommand extends Command {
 			return;
 		}
 		
-		Main.ratioSolver.useMachineClass(mc, on);
-		System.out.println("Turned machine class \"" + machineClassName + "\" " + (on ? "on" : "off"));
+		Collection<Item> itemsSet = Main.ratioSolver.setRaw((recipe) -> recipe.machineClass().equals(mc), !on);
+		for (Item item : itemsSet) {
+			System.out.println("Set " + item + " to " + (on ? "unraw" : "raw"));
+		}
 	}
 }

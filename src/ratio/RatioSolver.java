@@ -1,10 +1,14 @@
 package ratio;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.commons.math3.fraction.Fraction;
 import org.apache.commons.math3.util.Pair;
@@ -43,12 +47,25 @@ public class RatioSolver {
 	 * @param item
 	 * @param setRaw 
 	 */
-	public void setRaw(Item item, boolean setRaw) {
+	public boolean setRaw(Item item, boolean setRaw) {
 		if (setRaw) {
-			doNotSolve.add(item);
+			return doNotSolve.add(item);
 		} else {
-			doNotSolve.remove(item);
+			return doNotSolve.remove(item);
 		}
+	}
+	
+	public Collection<Item> setRaw(Predicate<Recipe> set, boolean setRaw) {
+		List<Item> itemsSet = new ArrayList<>();
+		for (Recipe recipe : recipes.values()) {
+			if (set.test(recipe)) {
+				if (setRaw(recipe.output(), setRaw)) {
+					itemsSet.add(recipe.output());
+				}
+			}
+		}
+		
+		return itemsSet;
 	}
 	
 	public void solve(Item item) {
