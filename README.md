@@ -10,7 +10,7 @@ Run the FactorioRatioAssitant.jar by opening a command line and typing <code> ja
 Once the program is running, all you need to do is type the name of the item that you would like to find the correct ratio for. This will give you a tree structure with the number of machines needed for each component along the way (that there is a recipe for). By default this uses the Assembling Machine 1, but can be changed using some commands.
 
 ## Commands
-There are a few useful commands to change how the program behaves:
+There are a few useful commands to change how the program behaves. For a more extensive list, check out the [wiki](https://github.com/asampley/FactorioRatioAssistant/wiki)
 
 <code>/level \<machine name> \<level> </code><br>
         Changes the level of a machine. Each machine can have different crafting speeds defined by their machine file.<br>
