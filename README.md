@@ -1,6 +1,9 @@
 # FactorioRatioAssistant
 A program which calculates exact ratios for factorio assembling machines, such that the number of assembling machines is the lowest possible integer for optimal assembling. For a more thorough look at all the options, look at the [wiki](https://github.com/asampley/FactorioRatioAssistant/wiki)
 
+## Why not a mod?
+I've thought about making a mod for factorio, but the one problem with that is it disables achievements. I personally like to get achievements, so an external program is the solution, but perhaps a mod version will come eventually.
+
 ## Installation
 Download everything in the build folder. If you do not have Java 8 installed, install it.
 
