@@ -71,4 +71,8 @@ public class Machine {
 		
 		return toString();
 	}
+
+	public Fraction outputCountPerSec() {
+		return new Fraction(this.recipe().outputCount).divide(this.time());
+	}
 }

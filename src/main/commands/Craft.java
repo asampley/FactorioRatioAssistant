@@ -75,7 +75,9 @@ public class Craft extends Command {
 			System.out.println();
 			
 			System.out.println("--Total Production Per Second--");
-			Fraction prodPerSec = tree.getRootValue().getCount().divide(tree.getRootValue().getMachine().time());
+			Machine machine = tree.getRootValue().getMachine();
+			Fraction machineCount = tree.getRootValue().getCount();
+			Fraction prodPerSec = machineCount.multiply(machine.outputCountPerSec());
 			System.out.println("\t" + prodPerSec + " x " + item);
 			System.out.println();
 			
