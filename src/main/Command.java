@@ -1,6 +1,9 @@
 package main;
 
+import java.util.Collection;
 import java.util.function.Consumer;
+
+import org.apache.commons.math3.util.Pair;
 
 public class Command {
 	public final String NAME;
@@ -19,5 +22,9 @@ public class Command {
 	
 	public void accept(String args) {
 		function.accept(args);
+	}
+
+	public Collection<Pair<Integer, String>> tabComplete(String commandArgs) {
+		return null;
 	}
 }

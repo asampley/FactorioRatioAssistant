@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+
+import org.apache.commons.math3.util.Pair;
 
 import init.ItemInit;
 import init.MachineInit;
@@ -81,62 +85,153 @@ public class Main {
 			System.exit(1);
 		}
 		
-		Scanner in = null;
+		InputStream in = null;
+		char inChar;
+		StringBuffer inLine = new StringBuffer();
 		boolean onInitFile = false;
 		if (args.length > 1) {
 			String initFile = args[1];
 			
 			try {
-				in = new Scanner(new FileInputStream(new File(initFile)));
+				in = new FileInputStream(new File(initFile));
 				onInitFile = true;
 				System.out.println("Loaded init file \"" + initFile + "\"");
 			} catch (FileNotFoundException e) {
 				System.err.println("Warning: Init file \"" + initFile + "\" not found");
-				in = new Scanner(System.in);
+				in = System.in;
 			}
 		} else {
-			in = new Scanner(System.in);
+			in = System.in;
 		}
-
+		
 		//System.out.println(recipes);
 		
 		ratioSolver = new RatioSolver(recipes, machineSpeeds);
 		
-		while (in.hasNextLine()) {
-			String line = in.nextLine();
-			
-			if (line.length() == 0) continue;
-			
-			// check for command
-			if (line.charAt(0) == '/') {
-				int split = line.indexOf(' ');
+		try {
+			while (true) {
+				inChar = (char)in.read();
 				
-				String command;
+				Pair<Command, String> commandAndArgs;
+				Command command;
 				String commandArgs;
-				if (split == -1) {
-					command = line.substring(1, line.length());
-					commandArgs = "";
-				} else {
-					command = line.substring(1, split);
-					commandArgs = line.substring(split + 1, line.length());
+				
+				switch (inChar) {
+//				case '\b':
+//				case (char)127: // delete character
+//					inLine.deleteCharAt(inLine.length() - 1);
+//					break;
+				case '\n':
+				case (char)-1:
+					String line = inLine.toString();
+					inLine = new StringBuffer();
+					if (line.length() == 0) break;
+					
+					try {
+						commandAndArgs = parseCommand(line.toString());
+					} catch (CommandNotFoundException e1) {
+						System.err.println(e1.getMessage());
+						break;
+					}
+					
+					command = commandAndArgs.getFirst();
+					commandArgs = commandAndArgs.getSecond();
+					
+					command.accept(commandArgs);
+					break;
+				case '\t':
+//					System.out.print('\b');
+					
+					if (inLine.length() == 0) break;
+					
+					try {
+						commandAndArgs = parseCommand(inLine.toString());
+					} catch (CommandNotFoundException e1) {
+						e1.printStackTrace();
+						break;
+					}
+					
+					command = commandAndArgs.getFirst();
+					commandArgs = commandAndArgs.getSecond();
+					
+					Collection<Pair<Integer, String>> completions = command.tabComplete(commandArgs);
+					
+					if (completions == null) break;
+					else if (completions.isEmpty()) break;
+					else if (completions.size() == 1) {
+						Pair<Integer, String> backAndReplacement = completions.iterator().next();
+						inLine.delete(inLine.length() - backAndReplacement.getFirst(), inLine.length());
+						inLine.append(backAndReplacement.getSecond());
+					} else {
+						for (Pair<Integer, String> backAndReplacement : completions) {
+							System.out.println(backAndReplacement.getSecond());
+						}
+					}
+					break;
+				default:
+					inLine.append(inChar);
+					break;
 				}
 				
-				if (commandMap.containsKey(command)) {
-					commandMap.get(command).accept(commandArgs);
-				} else {
-					System.err.println("Unrecognized command : " + command);
+				// check if we are done init file to switch to input
+				if (inChar == (char)-1) {
+					if (onInitFile) {
+						try {
+							in.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						in = System.in;
+					} else {
+						// end while loop
+						break;
+					}
 				}
-			} else { // default command
-				commandMap.get(defaultCommand).accept(line);
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			//e1.printStackTrace();
+		}
+		
+		try {
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static Pair<Command, String> parseCommand(String inLine) throws CommandNotFoundException {
+		Command command = null;
+		String args = "";
+		
+		if (inLine.length() == 0) return new Pair<>(command, args);
+		
+		// check for command
+		if (inLine.charAt(0) == '/') {
+			int split = inLine.indexOf(" ");
+			
+			String commandString;
+			if (split == -1) {
+				commandString = inLine.substring(1, inLine.length());
+				args = "";
+			} else {
+				commandString = inLine.substring(1, split);
+				args = inLine.substring(split + 1, inLine.length());
 			}
 			
-			// check if we are done init file to switch to input
-			if (onInitFile && !in.hasNextLine()) {
-				in.close();
-				in = new Scanner(System.in);
+			if (commandMap.containsKey(commandString)) {
+				command = commandMap.get(commandString);
+			} else {
+				throw new CommandNotFoundException(commandString);
 			}
+		} else { // default command
+			command = commandMap.get(defaultCommand);
+			args = inLine.toString();
 		}
-		in.close();
+		
+		return new Pair<>(command, args);
 	}
 	
 	private static void initCommands() {
